@@ -8,7 +8,10 @@ import com.adammcneilly.pokedex.models.Species
 import com.adammcneilly.pokedex.models.Type
 import com.adammcneilly.pokedex.network.NetworkState
 import com.adammcneilly.pokedex.network.PokemonRepository
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.*
 
 class DetailActivityViewModel(
     private val repository: PokemonRepository,
@@ -53,11 +56,19 @@ class DetailActivityViewModel(
     val showSecondType: Boolean
         get() = secondType != null
 
+    private var job: Job? = null
+
     init {
-        compositeDisposable.add(repository.pokemonState.subscribe(this::processPokemonState))
+        compositeDisposable.add(repository.pokemonState.observeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(this::processPokemonState))
         compositeDisposable.add(repository.pokemonSpecies.subscribe(this::processSpecies))
 
-        repository.fetchPokemonByName(pokemonName)
+        job = CoroutineScope(Dispatchers.IO).launch {
+            val pokemon = repository.getPokemonDetail(pokemonName)
+            val state = NetworkState.Loaded(pokemon)
+            withContext(Dispatchers.Main) {
+                processPokemonState(state)
+            }
+        }
     }
 
     private fun processPokemonState(networkState: NetworkState) {
@@ -82,5 +93,11 @@ class DetailActivityViewModel(
 
         this.state.value = newState
         notifyChange()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.dispose()
+        job?.cancel()
     }
 }

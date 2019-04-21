@@ -1,5 +1,6 @@
 package com.adammcneilly.pokedex.network
 
+import com.adammcneilly.pokedex.models.Pokemon
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -50,6 +51,11 @@ open class PokemonRepository(
             .subscribe(pokemonState::onNext)
 
         disposables.add(subscription)
+    }
+
+    suspend fun getPokemonDetail(name: String): Pokemon {
+        pokemonState.onNext(NetworkState.Loading)
+        return api.getPokemonDetailAsync(name).await()
     }
 
     fun fetchPokemonSpecies(name: String) {

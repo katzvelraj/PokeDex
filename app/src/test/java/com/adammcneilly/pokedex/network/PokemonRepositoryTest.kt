@@ -7,10 +7,14 @@ import com.adammcneilly.pokedex.whenever
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 
+@Suppress("UNCHECKED_CAST")
 class PokemonRepositoryTest {
     private val mockAPI = mock(PokemonAPI::class.java)
     private val repository = PokemonRepository(
@@ -120,5 +124,19 @@ class PokemonRepositoryTest {
             .assertValueAt(1) {
                 it is NetworkState.Error
             }
+    }
+
+    @Test
+    fun getPokemonDetailAsync() {
+        runBlocking {
+            val testPokemon = Pokemon(name = "Adam")
+
+            val mockDeferred = mock(Deferred::class.java) as Deferred<Pokemon>
+            whenever(mockDeferred.await()).thenReturn(testPokemon)
+            whenever(mockAPI.getPokemonDetailAsync(anyString())).thenReturn(mockDeferred)
+
+            val result = repository.getPokemonDetail("")
+            assertEquals(testPokemon, result)
+        }
     }
 }

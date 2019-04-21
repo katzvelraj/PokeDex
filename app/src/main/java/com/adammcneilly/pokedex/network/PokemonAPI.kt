@@ -3,7 +3,9 @@ package com.adammcneilly.pokedex.network
 import com.adammcneilly.pokedex.models.Pokemon
 import com.adammcneilly.pokedex.models.PokemonResponse
 import com.adammcneilly.pokedex.models.Species
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import io.reactivex.Single
+import kotlinx.coroutines.Deferred
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -19,6 +21,9 @@ interface PokemonAPI {
     @GET("v2/pokemon/{name}")
     fun getPokemonByName(@Path("name") name: String): Single<Pokemon>
 
+    @GET("v2/pokemon/{name}")
+    fun getPokemonDetailAsync(@Path("name") name: String): Deferred<Pokemon>
+
     @GET("v2/pokemon-species/{name}")
     fun getPokemonSpecies(@Path("name") name: String): Single<Species>
 
@@ -30,6 +35,7 @@ interface PokemonAPI {
                 .baseUrl(baseUrl)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .client(client)
                 .build()
                 .create(PokemonAPI::class.java)
