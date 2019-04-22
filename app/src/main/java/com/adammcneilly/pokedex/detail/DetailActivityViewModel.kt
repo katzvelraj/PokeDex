@@ -8,14 +8,12 @@ import com.adammcneilly.pokedex.models.Type
 import com.adammcneilly.pokedex.network.NetworkState
 import com.adammcneilly.pokedex.network.PokemonRepository
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class DetailActivityViewModel(
     private val repository: PokemonRepository,
-    private val pokemonName: String
+    private val pokemonName: String,
+    processDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BaseObservableViewModel() {
     private val compositeDisposable = CompositeDisposable()
     private val state = MutableLiveData<DetailActivityState>()
@@ -59,7 +57,7 @@ class DetailActivityViewModel(
     private var job: Job? = null
 
     init {
-        job = CoroutineScope(Dispatchers.IO).launch {
+        job = CoroutineScope(processDispatcher).launch {
             processPokemonState(NetworkState.Loading)
 
             try {
@@ -69,7 +67,6 @@ class DetailActivityViewModel(
             } catch (error: Throwable) {
                 processPokemonState(NetworkState.Error(error))
             }
-
         }
     }
 
