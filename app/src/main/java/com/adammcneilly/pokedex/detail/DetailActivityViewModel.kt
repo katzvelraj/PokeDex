@@ -4,14 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import com.adammcneilly.pokedex.BaseObservableViewModel
 import com.adammcneilly.pokedex.R
 import com.adammcneilly.pokedex.models.Pokemon
-import com.adammcneilly.pokedex.models.Species
 import com.adammcneilly.pokedex.models.Type
 import com.adammcneilly.pokedex.network.NetworkState
 import com.adammcneilly.pokedex.network.PokemonRepository
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class DetailActivityViewModel(
     private val repository: PokemonRepository,
@@ -59,15 +59,17 @@ class DetailActivityViewModel(
     private var job: Job? = null
 
     init {
-        compositeDisposable.add(repository.pokemonState.observeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(this::processPokemonState))
-        compositeDisposable.add(repository.pokemonSpecies.subscribe(this::processSpecies))
-
         job = CoroutineScope(Dispatchers.IO).launch {
-            val pokemon = repository.getPokemonDetail(pokemonName)
-            val state = NetworkState.Loaded(pokemon)
-            withContext(Dispatchers.Main) {
+            processPokemonState(NetworkState.Loading)
+
+            try {
+                val pokemon = repository.getPokemonDetail(pokemonName)
+                val state = NetworkState.Loaded(pokemon)
                 processPokemonState(state)
+            } catch (error: Throwable) {
+                processPokemonState(NetworkState.Error(error))
             }
+
         }
     }
 
@@ -75,23 +77,12 @@ class DetailActivityViewModel(
         val newState: DetailActivityState = when (networkState) {
             NetworkState.Loading -> currentState.copy(loading = true, pokemon = null, error = null)
             is NetworkState.Loaded<*> -> {
-                repository.fetchPokemonSpecies(pokemonName)
                 currentState.copy(loading = false, pokemon = networkState.data as? Pokemon, error = null)
             }
             is NetworkState.Error -> currentState.copy(loading = false, pokemon = null, error = networkState.error)
         }
 
-        this.state.value = newState
-        notifyChange()
-    }
-
-    private fun processSpecies(networkState: NetworkState) {
-        val newState: DetailActivityState = when (networkState) {
-            is NetworkState.Loaded<*> -> currentState.copy(species = networkState.data as? Species)
-            else -> currentState
-        }
-
-        this.state.value = newState
+        this.state.postValue(newState)
         notifyChange()
     }
 

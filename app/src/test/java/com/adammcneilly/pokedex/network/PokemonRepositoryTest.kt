@@ -42,23 +42,6 @@ class PokemonRepositoryTest {
     }
 
     @Test
-    fun loadPokemonByName() {
-        val testSub = repository.pokemonState.test()
-
-        whenever(mockAPI.getPokemonByName(anyString())).thenReturn(Single.just(Pokemon()))
-        repository.fetchPokemonByName("")
-
-        testSub
-            .assertValueCount(2)
-            .assertValueAt(0) {
-                it is NetworkState.Loading
-            }
-            .assertValueAt(1) {
-                it is NetworkState.Loaded<*>
-            }
-    }
-
-    @Test
     fun loadPokemonSpecies() {
         val testSub = repository.pokemonSpecies.test()
 
@@ -81,23 +64,6 @@ class PokemonRepositoryTest {
 
         whenever(mockAPI.getPokemon()).thenReturn(Single.error<PokemonResponse>(Throwable("Whoops")))
         repository.fetchPokemon()
-
-        testSub
-            .assertValueCount(2)
-            .assertValueAt(0) {
-                it is NetworkState.Loading
-            }
-            .assertValueAt(1) {
-                it is NetworkState.Error
-            }
-    }
-
-    @Test
-    fun loadingPokemonByNameError() {
-        val testSub = repository.pokemonState.test()
-
-        whenever(mockAPI.getPokemonByName(anyString())).thenReturn(Single.error<Pokemon>(Throwable("Whoops")))
-        repository.fetchPokemonByName("")
 
         testSub
             .assertValueCount(2)

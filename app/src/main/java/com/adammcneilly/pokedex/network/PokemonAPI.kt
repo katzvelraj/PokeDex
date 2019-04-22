@@ -19,9 +19,6 @@ interface PokemonAPI {
     fun getPokemon(): Single<PokemonResponse>
 
     @GET("v2/pokemon/{name}")
-    fun getPokemonByName(@Path("name") name: String): Single<Pokemon>
-
-    @GET("v2/pokemon/{name}")
     fun getPokemonDetailAsync(@Path("name") name: String): Deferred<Pokemon>
 
     @GET("v2/pokemon-species/{name}")

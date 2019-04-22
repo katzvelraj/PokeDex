@@ -14,7 +14,6 @@ open class PokemonRepository(
     private val observerScheduler: Scheduler = AndroidSchedulers.mainThread()
 ) {
     val pokemonResponseState = PublishSubject.create<NetworkState>()
-    val pokemonState = PublishSubject.create<NetworkState>()
     val pokemonSpecies = PublishSubject.create<NetworkState>()
 
     fun fetchPokemon() {
@@ -35,26 +34,7 @@ open class PokemonRepository(
         disposables.add(subscription)
     }
 
-    fun fetchPokemonByName(name: String) {
-        val subscription = api.getPokemonByName(name)
-            .subscribeOn(processScheduler)
-            .observeOn(observerScheduler)
-            .map {
-                NetworkState.Loaded(it) as NetworkState
-            }
-            .doOnSubscribe {
-                pokemonState.onNext(NetworkState.Loading)
-            }
-            .onErrorReturn {
-                NetworkState.Error(it)
-            }
-            .subscribe(pokemonState::onNext)
-
-        disposables.add(subscription)
-    }
-
     suspend fun getPokemonDetail(name: String): Pokemon {
-        pokemonState.onNext(NetworkState.Loading)
         return api.getPokemonDetailAsync(name).await()
     }
 
