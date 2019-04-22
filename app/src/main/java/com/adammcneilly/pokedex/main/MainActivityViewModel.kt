@@ -7,7 +7,6 @@ import com.adammcneilly.pokedex.BaseObservableViewModel
 import com.adammcneilly.pokedex.models.Pokemon
 import com.adammcneilly.pokedex.models.PokemonResponse
 import com.adammcneilly.pokedex.network.PokemonRepository
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +17,6 @@ class MainActivityViewModel(
     repository: PokemonRepository,
     processDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BaseObservableViewModel() {
-    private val compositeDisposable = CompositeDisposable()
     private val state = MutableLiveData<MainActivityState>()
 
     private val currentState: MainActivityState
@@ -75,7 +73,6 @@ class MainActivityViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        compositeDisposable.dispose()
         job?.cancel()
     }
 }

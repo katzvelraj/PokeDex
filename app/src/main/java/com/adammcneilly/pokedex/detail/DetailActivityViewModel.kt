@@ -6,7 +6,6 @@ import com.adammcneilly.pokedex.R
 import com.adammcneilly.pokedex.models.Pokemon
 import com.adammcneilly.pokedex.models.Type
 import com.adammcneilly.pokedex.network.PokemonRepository
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +17,6 @@ class DetailActivityViewModel(
     private val pokemonName: String,
     processDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BaseObservableViewModel() {
-    private val compositeDisposable = CompositeDisposable()
     private val state = MutableLiveData<DetailActivityState>()
 
     private val currentState: DetailActivityState
@@ -95,7 +93,6 @@ class DetailActivityViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        compositeDisposable.dispose()
         job?.cancel()
     }
 }
