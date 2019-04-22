@@ -8,7 +8,11 @@ import com.adammcneilly.pokedex.models.Type
 import com.adammcneilly.pokedex.network.NetworkState
 import com.adammcneilly.pokedex.network.PokemonRepository
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class DetailActivityViewModel(
     private val repository: PokemonRepository,
@@ -60,8 +64,9 @@ class DetailActivityViewModel(
         job = CoroutineScope(processDispatcher).launch {
             processPokemonState(NetworkState.Loading)
 
+            @Suppress("TooGenericExceptionCaught")
             try {
-                val pokemon = repository.getPokemonDetail(pokemonName)
+                val pokemon = repository.getPokemonDetail("blahblah")
                 val state = NetworkState.Loaded(pokemon)
                 processPokemonState(state)
             } catch (error: Throwable) {

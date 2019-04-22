@@ -259,7 +259,7 @@ formatting:
     active: true
     autoCorrect: true
   NoWildcardImports:
-    active: false
+    active: true
     autoCorrect: true
   PackageName:
     active: true

@@ -2,15 +2,12 @@ package com.adammcneilly.pokedex.detail
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.adammcneilly.pokedex.R
-import com.adammcneilly.pokedex.models.Color
 import com.adammcneilly.pokedex.models.Pokemon
-import com.adammcneilly.pokedex.models.Species
 import com.adammcneilly.pokedex.models.Type
 import com.adammcneilly.pokedex.models.TypeSlot
 import com.adammcneilly.pokedex.network.PokemonAPI
 import com.adammcneilly.pokedex.network.PokemonRepository
 import com.adammcneilly.pokedex.whenever
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Deferred
@@ -23,7 +20,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import java.lang.IllegalArgumentException
 
