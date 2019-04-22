@@ -41,7 +41,6 @@ class PokemonRepositoryTest {
                 repository.getPokemon()
                 fail("Expected network call to fail.")
             } catch (error: Throwable) {
-
             }
         }
     }
@@ -71,7 +70,6 @@ class PokemonRepositoryTest {
                 repository.getPokemonDetail("")
                 fail("Expected network call to fail.")
             } catch (error: Throwable) {
-
             }
         }
     }
