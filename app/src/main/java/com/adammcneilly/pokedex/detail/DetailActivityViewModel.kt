@@ -5,7 +5,6 @@ import com.adammcneilly.pokedex.BaseObservableViewModel
 import com.adammcneilly.pokedex.R
 import com.adammcneilly.pokedex.models.Pokemon
 import com.adammcneilly.pokedex.models.Type
-import com.adammcneilly.pokedex.network.NetworkState
 import com.adammcneilly.pokedex.network.PokemonRepository
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.CoroutineDispatcher
@@ -62,28 +61,34 @@ class DetailActivityViewModel(
 
     init {
         job = CoroutineScope(processDispatcher).launch {
-            processPokemonState(NetworkState.Loading)
+            startLoading()
 
             @Suppress("TooGenericExceptionCaught")
             try {
-                val pokemon = repository.getPokemonDetail("blahblah")
-                val state = NetworkState.Loaded(pokemon)
-                processPokemonState(state)
+                val pokemon = repository.getPokemonDetail(pokemonName)
+                processPokemon(pokemon)
             } catch (error: Throwable) {
-                processPokemonState(NetworkState.Error(error))
+                handleError(error)
             }
         }
     }
 
-    private fun processPokemonState(networkState: NetworkState) {
-        val newState: DetailActivityState = when (networkState) {
-            NetworkState.Loading -> currentState.copy(loading = true, pokemon = null, error = null)
-            is NetworkState.Loaded<*> -> {
-                currentState.copy(loading = false, pokemon = networkState.data as? Pokemon, error = null)
-            }
-            is NetworkState.Error -> currentState.copy(loading = false, pokemon = null, error = networkState.error)
-        }
+    private fun startLoading() {
+        val newState = currentState.copy(loading = true, pokemon = null, error = null)
+        postState(newState)
+    }
 
+    private fun processPokemon(pokemon: Pokemon) {
+        val newState = currentState.copy(loading = false, pokemon = pokemon, error = null)
+        postState(newState)
+    }
+
+    private fun handleError(error: Throwable) {
+        val newState = currentState.copy(loading = false, pokemon = null, error = error)
+        postState(newState)
+    }
+
+    private fun postState(newState: DetailActivityState) {
         this.state.postValue(newState)
         notifyChange()
     }
