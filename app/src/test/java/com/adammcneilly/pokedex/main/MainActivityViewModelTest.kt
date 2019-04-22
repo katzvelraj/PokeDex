@@ -7,8 +7,6 @@ import com.adammcneilly.pokedex.network.PokemonAPI
 import com.adammcneilly.pokedex.network.PokemonRepository
 import com.adammcneilly.pokedex.testObserver
 import com.adammcneilly.pokedex.whenever
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -26,12 +24,7 @@ class MainActivityViewModelTest {
     val instantTaskExecutor = InstantTaskExecutorRule()
 
     private val mockAPI = mock(PokemonAPI::class.java)
-    private val repository = PokemonRepository(
-        mockAPI,
-        CompositeDisposable(),
-        Schedulers.trampoline(),
-        Schedulers.trampoline()
-    )
+    private val repository = PokemonRepository(mockAPI)
 
     @Test
     fun loadData() {
