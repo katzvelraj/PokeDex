@@ -10,6 +10,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
@@ -25,20 +26,33 @@ class PokemonRepositoryTest {
     )
 
     @Test
-    fun loadPokemonList() {
-        val testSub = repository.pokemonResponseState.test()
+    fun getPokemon() {
+        runBlocking {
+            val testResult = PokemonResponse(count = 10)
 
-        whenever(mockAPI.getPokemon()).thenReturn(Single.just(PokemonResponse()))
-        repository.fetchPokemon()
+            val mockDeferred = mock(Deferred::class.java) as Deferred<PokemonResponse>
+            whenever(mockDeferred.await()).thenReturn(testResult)
+            whenever(mockAPI.getPokemonAsync()).thenReturn(mockDeferred)
 
-        testSub
-            .assertValueCount(2)
-            .assertValueAt(0) {
-                it is NetworkState.Loading
+            val result = repository.getPokemon()
+            assertEquals(testResult, result)
+        }
+    }
+
+    @Test
+    fun getPokemonError() {
+        runBlocking {
+            val mockDeferred = mock(Deferred::class.java) as Deferred<PokemonResponse>
+            whenever(mockDeferred.await()).thenThrow(java.lang.IllegalArgumentException())
+            whenever(mockAPI.getPokemonAsync()).thenReturn(mockDeferred)
+
+            try {
+                repository.getPokemon()
+                fail("Expected network call to fail.")
+            } catch (error: Throwable) {
+
             }
-            .assertValueAt(1) {
-                it is NetworkState.Loaded<*>
-            }
+        }
     }
 
     @Test
@@ -55,23 +69,6 @@ class PokemonRepositoryTest {
             }
             .assertValueAt(1) {
                 it is NetworkState.Loaded<*>
-            }
-    }
-
-    @Test
-    fun loadingPokemonListError() {
-        val testSub = repository.pokemonResponseState.test()
-
-        whenever(mockAPI.getPokemon()).thenReturn(Single.error<PokemonResponse>(Throwable("Whoops")))
-        repository.fetchPokemon()
-
-        testSub
-            .assertValueCount(2)
-            .assertValueAt(0) {
-                it is NetworkState.Loading
-            }
-            .assertValueAt(1) {
-                it is NetworkState.Error
             }
     }
 
@@ -93,7 +90,7 @@ class PokemonRepositoryTest {
     }
 
     @Test
-    fun getPokemonDetailAsync() {
+    fun getPokemonDetail() {
         runBlocking {
             val testPokemon = Pokemon(name = "Adam")
 
@@ -103,6 +100,22 @@ class PokemonRepositoryTest {
 
             val result = repository.getPokemonDetail("")
             assertEquals(testPokemon, result)
+        }
+    }
+
+    @Test
+    fun getPokemonDetailError() {
+        runBlocking {
+            val mockDeferred = mock(Deferred::class.java) as Deferred<Pokemon>
+            whenever(mockDeferred.await()).thenThrow(IllegalArgumentException())
+            whenever(mockAPI.getPokemonDetailAsync(anyString())).thenReturn(mockDeferred)
+
+            try {
+                repository.getPokemonDetail("")
+                fail("Expected network call to fail.")
+            } catch (error: Throwable) {
+
+            }
         }
     }
 }

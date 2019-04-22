@@ -16,7 +16,7 @@ import retrofit2.http.Path
 
 interface PokemonAPI {
     @GET("v2/pokemon")
-    fun getPokemon(): Single<PokemonResponse>
+    fun getPokemonAsync(): Deferred<PokemonResponse>
 
     @GET("v2/pokemon/{name}")
     fun getPokemonDetailAsync(@Path("name") name: String): Deferred<Pokemon>

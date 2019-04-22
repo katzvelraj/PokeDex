@@ -1,6 +1,7 @@
 package com.adammcneilly.pokedex.network
 
 import com.adammcneilly.pokedex.models.Pokemon
+import com.adammcneilly.pokedex.models.PokemonResponse
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -13,25 +14,10 @@ open class PokemonRepository(
     private val processScheduler: Scheduler = Schedulers.io(),
     private val observerScheduler: Scheduler = AndroidSchedulers.mainThread()
 ) {
-    val pokemonResponseState = PublishSubject.create<NetworkState>()
     val pokemonSpecies = PublishSubject.create<NetworkState>()
 
-    fun fetchPokemon() {
-        val subscription = api.getPokemon()
-            .subscribeOn(processScheduler)
-            .observeOn(observerScheduler)
-            .map {
-                NetworkState.Loaded(it) as NetworkState
-            }
-            .doOnSubscribe {
-                pokemonResponseState.onNext(NetworkState.Loading)
-            }
-            .onErrorReturn {
-                NetworkState.Error(it)
-            }
-            .subscribe(pokemonResponseState::onNext)
-
-        disposables.add(subscription)
+    suspend fun getPokemon(): PokemonResponse {
+        return api.getPokemonAsync().await()
     }
 
     suspend fun getPokemonDetail(name: String): Pokemon {
