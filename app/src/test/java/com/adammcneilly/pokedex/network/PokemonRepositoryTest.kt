@@ -2,11 +2,7 @@ package com.adammcneilly.pokedex.network
 
 import com.adammcneilly.pokedex.models.Pokemon
 import com.adammcneilly.pokedex.models.PokemonResponse
-import com.adammcneilly.pokedex.models.Species
 import com.adammcneilly.pokedex.whenever
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -18,12 +14,7 @@ import org.mockito.Mockito.mock
 @Suppress("UNCHECKED_CAST")
 class PokemonRepositoryTest {
     private val mockAPI = mock(PokemonAPI::class.java)
-    private val repository = PokemonRepository(
-        mockAPI,
-        CompositeDisposable(),
-        Schedulers.trampoline(),
-        Schedulers.trampoline()
-    )
+    private val repository = PokemonRepository(mockAPI)
 
     @Test
     fun getPokemon() {
@@ -53,40 +44,6 @@ class PokemonRepositoryTest {
 
             }
         }
-    }
-
-    @Test
-    fun loadPokemonSpecies() {
-        val testSub = repository.pokemonSpecies.test()
-
-        whenever(mockAPI.getPokemonSpecies(anyString())).thenReturn(Single.just(Species()))
-        repository.fetchPokemonSpecies("")
-
-        testSub
-            .assertValueCount(2)
-            .assertValueAt(0) {
-                it is NetworkState.Loading
-            }
-            .assertValueAt(1) {
-                it is NetworkState.Loaded<*>
-            }
-    }
-
-    @Test
-    fun loadingPokemonSpeciesError() {
-        val testSub = repository.pokemonSpecies.test()
-
-        whenever(mockAPI.getPokemonSpecies(anyString())).thenReturn(Single.error<Species>(Throwable("whoops")))
-        repository.fetchPokemonSpecies("")
-
-        testSub
-            .assertValueCount(2)
-            .assertValueAt(0) {
-                it is NetworkState.Loading
-            }
-            .assertValueAt(1) {
-                it is NetworkState.Error
-            }
     }
 
     @Test

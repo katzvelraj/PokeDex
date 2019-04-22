@@ -21,9 +21,6 @@ interface PokemonAPI {
     @GET("v2/pokemon/{name}")
     fun getPokemonDetailAsync(@Path("name") name: String): Deferred<Pokemon>
 
-    @GET("v2/pokemon-species/{name}")
-    fun getPokemonSpecies(@Path("name") name: String): Single<Species>
-
     companion object {
         fun defaultInstance(baseUrl: String): PokemonAPI {
             val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -31,7 +28,6 @@ interface PokemonAPI {
             return Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(MoshiConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .client(client)
                 .build()

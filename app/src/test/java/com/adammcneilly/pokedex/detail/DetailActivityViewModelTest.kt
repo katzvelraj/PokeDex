@@ -8,8 +8,6 @@ import com.adammcneilly.pokedex.models.TypeSlot
 import com.adammcneilly.pokedex.network.PokemonAPI
 import com.adammcneilly.pokedex.network.PokemonRepository
 import com.adammcneilly.pokedex.whenever
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -21,7 +19,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
-import java.lang.IllegalArgumentException
 
 @Suppress("UNCHECKED_CAST")
 class DetailActivityViewModelTest {
@@ -30,12 +27,7 @@ class DetailActivityViewModelTest {
     val instantTaskExecutor = InstantTaskExecutorRule()
 
     private val mockAPI = mock(PokemonAPI::class.java)
-    private val repository = PokemonRepository(
-        mockAPI,
-        CompositeDisposable(),
-        Schedulers.trampoline(),
-        Schedulers.trampoline()
-    )
+    private val repository = PokemonRepository(mockAPI)
 
     @Test
     fun loadData() {
